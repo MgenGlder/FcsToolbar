@@ -1,128 +1,145 @@
 <template>
-  <div id="wrapper">
-    <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
-    <main>
-      <div class="left-side">
-        <span class="title">
-          Welcome to your new project!
-        </span>
-        <system-information></system-information>
+<div>
+  <div class="header-arrow"></div>
+  <div class="window">
+    <header class="toolbar toolbar-header">
+      <h1 class="title">
+        FCS Toolbar
+        <span class="js-update-time"></span>
+      </h1>
+    </header>
+
+    <div class="window-content">
+      <div class="pane">
+
+        <services-status :servicesStatus='servicesStatus'  />
+
+        <div class="striped-bar"></div>
+
+        <externals-status :externalsStatus='externalsStatus' />
+
+        <div class="striped-bar"></div>
+        <div>
+          <div class="column">
+            <div class="reading js-temperature">FC</div>
+            <div class="description">Fcs Commands</div>
+          </div>
+          <div class="column">
+            <div class="reading js-apparent">WL</div>
+            <div class="description">Weighted List</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="column">
+            <div class="reading js-wind">TL</div>
+            <div class="description">Traffic Light</div>
+          </div>
+          <div class="column">
+            <div class="reading js-wind-direction">UL</div>
+            <div class="description">Useful Links</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="toolbar toolbar-footer">
+      <div class="footer-link">
+        Powered by
+        <a href="http://kunle.io">Kunle</a>
       </div>
 
-      <div class="right-side">
-        <div class="doc">
-          <div class="title">Getting Started</div>
-          <p>
-            electron-vue comes packed with detailed documentation that covers everything from
-            internal configurations, using the project structure, building your application,
-            and so much more.
-          </p>
-          <button @click="open('https://simulatedgreg.gitbooks.io/electron-vue/content/')">Read the Docs</button><br><br>
-        </div>
-        <div class="doc">
-          <div class="title alt">Other Documentation</div>
-          <button class="alt" @click="open('https://electron.atom.io/docs/')">Electron</button>
-          <button class="alt" @click="open('https://vuejs.org/v2/guide/')">Vue.js</button>
+      <div class="toolbar-actions pull-right">
+        <div class="btn-group">
+          <button class="btn btn-default js-refresh-action">
+            <span class="icon icon-arrows-ccw js-refresh-action" title="Refresh"></span>
+          </button>
+
+          <button @click="ping" class="btn btn-default js-quit-action">
+            <span class="icon icon-cancel js-quit-action" title="Quit"></span>
+          </button>
         </div>
       </div>
-    </main>
+    </footer>
   </div>
+</div>
 </template>
 
 <script>
-  import SystemInformation from './LandingPage/SystemInformation'
+import SystemInformation from './LandingPage/SystemInformation'
+import ServicesStatus from './ServicesStatus'
+import ExternalsStatus from './ExternalsStatus'
 
-  export default {
-    name: 'landing-page',
-    components: { SystemInformation },
-    methods: {
-      open (link) {
-        this.$electron.shell.openExternal(link)
+export default {
+  name: 'landing-page',
+  components: { SystemInformation, ServicesStatus, ExternalsStatus },
+  data () {
+    return {
+      portMapping: {
+        '8080': 'fcs-web',
+        '8081': 'management',
+        '8082': 'health',
+        '8083': 'enrollment',
+        '8084': 'auth',
+        '8085': 'analytics',
+        '8086': 'telematics'
+      },
+      externalsPortMapping: {
+        '8088': 'mongodb',
+        '8089': 'redis',
+        '8090': 'sqlserver',
+        '8091': 'zookeeper',
+        '8092': 'kafka'
+      },
+      servicesStatus: {
+        'fcs-web': false,
+        'management': false,
+        'health': false,
+        'enrollment': false,
+        'auth': false,
+        'analytics': false,
+        'telematics': false
+      },
+      externalsStatus: {
+        'mongodb': false,
+        'management': false,
+        'health': false,
+        'enrollment': false,
+        'auth': false,
+        'analytics': false,
+        'telematics': false
       }
     }
+  },
+  methods: {
+    open (link) {
+      this.$electron.shell.openExternal(link)
+    },
+    ping (message) {
+      this.$electron.ipcRenderer.send('ping', 'I am pinging you')
+    },
+    convertPortsToDependencyNames (portMapping, rawPortMappingFromBackend) {
+      let newPortMapping = {}
+      Object.keys(portMapping).forEach((port) => {
+        newPortMapping[portMapping[port]] = (rawPortMappingFromBackend[port] === 'open')
+      })
+      return newPortMapping
+    }
+  },
+  mounted () {
+    this.$electron.ipcRenderer.on('pingBack', (event, message) => {
+      console.log(message)
+    })
+    this.$electron.ipcRenderer.on('allRunningServicesResponse', (event, message) => {
+      this.servicesStatus = this.convertPortsToDependencyNames(this.portMapping, message)
+    })
+    this.$electron.ipcRenderer.on('allRunningExternalsResponse', (event, message) => {
+      this.externalsStatus = this.convertPortsToDependencyNames(this.externalsPortMapping, message)
+    })
   }
+}
 </script>
 
 <style>
-  @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
-
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  body { font-family: 'Source Sans Pro', sans-serif; }
-
-  #wrapper {
-    background:
-      radial-gradient(
-        ellipse at top left,
-        rgba(255, 255, 255, 1) 40%,
-        rgba(229, 229, 229, .9) 100%
-      );
-    height: 100vh;
-    padding: 60px 80px;
-    width: 100vw;
-  }
-
-  #logo {
-    height: auto;
-    margin-bottom: 20px;
-    width: 420px;
-  }
-
-  main {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  main > div { flex-basis: 50%; }
-
-  .left-side {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .welcome {
-    color: #555;
-    font-size: 23px;
-    margin-bottom: 10px;
-  }
-
-  .title {
-    color: #2c3e50;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 6px;
-  }
-
-  .title.alt {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-
-  .doc p {
-    color: black;
-    margin-bottom: 10px;
-  }
-
-  .doc button {
-    font-size: .8em;
-    cursor: pointer;
-    outline: none;
-    padding: 0.75em 2em;
-    border-radius: 2em;
-    display: inline-block;
-    color: #fff;
-    background-color: #4fc08d;
-    transition: all 0.15s ease;
-    box-sizing: border-box;
-    border: 1px solid #4fc08d;
-  }
-
-  .doc button.alt {
-    color: #42b983;
-    background-color: transparent;
-  }
+@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro");
 </style>

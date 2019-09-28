@@ -1,7 +1,8 @@
 'use strict'
 
-import { app, BrowserWindow, Tray } from 'electron'
+import { app, BrowserWindow, Tray, ipcMain } from 'electron'
 import path from 'path'
+import ps from 'portscanner'
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -50,6 +51,7 @@ const showWindow = () => {
   mainWindow.setPosition(position.x, position.y, false)
   mainWindow.show()
   mainWindow.focus()
+  mainWindow.openDevTools({mode: 'detach'})
 }
 
 function toggleWindow () {
@@ -66,12 +68,16 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
-    useContentSize: true,
-    width: 1000
+    height: 450,
+    width: 300,
+    show: false,
+    frame: false,
+    fullscreenable: false,
+    resizable: false,
+    transparent: true
   })
-
   mainWindow.loadURL(winURL)
+  mainWindow.openDevTools({mode: 'detach'})
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -92,6 +98,56 @@ app.on('activate', () => {
   }
 })
 
+ipcMain.on('ping', (event, arg) => {
+  console.log(arg)
+  event.sender.send('pingBack', 'I got your ping')
+})
+
+setInterval(() => {
+  // console.log('Interval has been passed!!')
+  let portsForServices = [
+    '8080',
+    '8081',
+    '8082',
+    '8083',
+    '8084',
+    '8085',
+    '8086',
+    '8087'
+  ]
+  let servicesEvent = 'allRunningServicesResponse'
+
+  let portsForExternals = [
+    '8088',
+    '8089',
+    '8090',
+    '8091',
+    '8092'
+  ]
+  let externalsEvent = 'allRunningExternalsResponse'
+  checkIfPortsOpenAndEmit(portsForServices, servicesEvent)
+  checkIfPortsOpenAndEmit(portsForExternals, externalsEvent)
+}, 300)
+
+function checkIfPortsOpenAndEmit (portsArray, servicesEvent) {
+  let activePortMapping = {}
+  let promiseArray = []
+  portsArray.forEach((port) => {
+    promiseArray.push(ps.checkPortStatus(port, '127.0.0.1'))
+  })
+
+  Promise.all(promiseArray)
+    .then((values) => {
+      values.map((value, index) => {
+        let currentPort = portsArray[index]
+        activePortMapping[currentPort] = value
+      })
+      mainWindow.webContents.send(servicesEvent, activePortMapping)
+    })
+    .catch((e) => {
+      console.log(e, 'catastrophic failure')
+    })
+}
 /**
  * Auto Updater
  *
