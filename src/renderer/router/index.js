@@ -13,22 +13,22 @@ export default new Router({
     {
       path: '/fc',
       name: 'fc',
-      component: require('@/components/FCSCommands').default
+      component: require('@/components/toolbar-apps/FCSCommands').default
     },
     {
       path: '/wl',
       name: 'wl',
-      component: require('@/components/WeightedList').default
+      component: require('@/components/toolbar-apps/WeightedList/WeightedList').default
     },
     {
       path: '/tl',
       name: 'tl',
-      component: require('@/components/TrafficLight').default
+      component: require('@/components/toolbar-apps/TrafficLight').default
     },
     {
       path: '/ul',
       name: 'ul',
-      component: require('@/components/FCSLinks').default
+      component: require('@/components/toolbar-apps/FCSLinks').default
     },
     {
       path: '*',
