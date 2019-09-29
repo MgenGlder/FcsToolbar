@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, Tray, ipcMain } from 'electron'
+import { app, BrowserWindow, Tray, ipcMain, Notification } from 'electron'
 import path from 'path'
 import ps from 'portscanner'
 /**
@@ -23,6 +23,8 @@ const winURL = process.env.NODE_ENV === 'development'
 
 function createTray () {
   tray = new Tray(path.join(assetsDirectory, 'cloudTemplate.png'))
+  tray.setToolTip('FCS Toolbox')
+  tray.setHighlightMode('selection')
   tray.on('right-click', toggleWindow)
   tray.on('double-click', toggleWindow)
   tray.on('click', function (event) {
@@ -76,6 +78,7 @@ function createWindow () {
     resizable: false,
     transparent: true
   })
+
   mainWindow.loadURL(winURL)
   mainWindow.openDevTools({mode: 'detach'})
 
@@ -98,9 +101,35 @@ app.on('activate', () => {
   }
 })
 
+ipcMain.on('openApp', (event, appName) => {
+  console.log(appName)
+  let newWindow = new BrowserWindow({
+    height: 800,
+    width: 800,
+    show: true,
+    frame: true,
+    fullscreenable: true,
+    resizable: true
+  })
+  newWindow.loadURL('http://localhost:9080/#' + appName)
+})
+
 ipcMain.on('ping', (event, arg) => {
   console.log(arg)
   event.sender.send('pingBack', 'I got your ping')
+})
+
+ipcMain.on('serviceStatusChange', (event, service, status) => {
+  let myNotification = new Notification({
+    title: service + ' has changed it\'s status',
+    body: 'it is now ' + status
+  })
+
+  myNotification.show()
+
+  myNotification.onclick = () => {
+    console.log('Notification clicked')
+  }
 })
 
 setInterval(() => {

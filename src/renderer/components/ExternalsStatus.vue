@@ -26,6 +26,11 @@ export default {
       type: Object
     }
   },
+  data () {
+    return {
+      dataInitialized: false
+    }
+  },
   methods: {
 
   },

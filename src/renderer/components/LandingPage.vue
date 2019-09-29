@@ -20,22 +20,22 @@
 
         <div class="striped-bar"></div>
         <div>
-          <div class="column">
+          <div class="column" @click="openApp('fc')">
             <div class="reading js-temperature">FC</div>
             <div class="description">Fcs Commands</div>
           </div>
-          <div class="column">
+          <div class="column"@click="openApp('wl')">
             <div class="reading js-apparent">WL</div>
             <div class="description">Weighted List</div>
           </div>
         </div>
 
         <div>
-          <div class="column">
+          <div class="column" @click="openApp('tl')">
             <div class="reading js-wind">TL</div>
             <div class="description">Traffic Light</div>
           </div>
-          <div class="column">
+          <div class="column" @click="openApp('ul')">
             <div class="reading js-wind-direction">UL</div>
             <div class="description">Useful Links</div>
           </div>
@@ -111,7 +111,24 @@ export default {
       }
     }
   },
+  watch: {
+    externalsStatus: {
+      handler: function (newValue, oldValue) {
+        Object.keys(oldValue).forEach((key) => {
+          if (newValue[key] !== oldValue[key]) {
+            let status = newValue[key] ? 'active' : 'inactive'
+            console.log(key + '\'s status has changed! It is now ' + status)
+            this.$electron.ipcRenderer.send('serviceStatusChange', key, status)
+          }
+        })
+      },
+      deep: true
+    }
+  },
   methods: {
+    openApp (appName) {
+      this.$electron.ipcRenderer.send('openApp', appName)
+    },
     open (link) {
       this.$electron.shell.openExternal(link)
     },
