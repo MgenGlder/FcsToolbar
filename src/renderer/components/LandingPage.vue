@@ -1,14 +1,4 @@
 <template>
-<div>
-  <div class="header-arrow"></div>
-  <div class="window">
-    <header class="toolbar toolbar-header">
-      <h1 class="title">
-        FCS Toolbar
-        <span class="js-update-time"></span>
-      </h1>
-    </header>
-
     <div class="window-content">
       <div class="pane">
 
@@ -20,49 +10,36 @@
 
         <div class="striped-bar"></div>
         <div>
-          <div class="column" @click="openApp('fc')">
-            <div class="reading js-temperature">FC</div>
-            <div class="description">Fcs Commands</div>
+          <div class="column fcs-column" @click="openApp('fc')">
+            <div class="app-container">
+              <div class="reading js-temperature">FC</div>
+              <div class="description">Fcs Commands</div>
+            </div>
           </div>
-          <div class="column"@click="openApp('wl')">
-            <div class="reading js-apparent">WL</div>
-            <div class="description">Weighted List</div>
+          <div class="column fcs-column" @click="openApp('wl')">
+            <div class="app-container">
+              <div class="reading js-apparent">WL</div>
+              <div class="description">Weighted List</div>
+            </div>
           </div>
         </div>
 
         <div>
-          <div class="column" @click="openApp('tl')">
-            <div class="reading js-wind">TL</div>
-            <div class="description">Traffic Light</div>
+          <div class="column fcs-column" @click="openApp('tl')">
+            <div class="app-container">
+              <div class="reading js-wind">TL</div>
+              <div class="description">Traffic Light</div>
+            </div>
           </div>
-          <div class="column" @click="openApp('ul')">
-            <div class="reading js-wind-direction">UL</div>
-            <div class="description">Useful Links</div>
+          <div class="column fcs-column" @click="openApp('ul')">
+            <div class="app-container">
+              <div class="reading js-wind-direction">UL</div>
+              <div class="description">Useful Links</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <footer class="toolbar toolbar-footer">
-      <div class="footer-link">
-        Powered by
-        <a href="http://kunle.io">Kunle</a>
-      </div>
-
-      <div class="toolbar-actions pull-right">
-        <div class="btn-group">
-          <button class="btn btn-default js-refresh-action">
-            <span class="icon icon-arrows-ccw js-refresh-action" title="Refresh"></span>
-          </button>
-
-          <button @click="ping" class="btn btn-default js-quit-action">
-            <span class="icon icon-cancel js-quit-action" title="Quit"></span>
-          </button>
-        </div>
-      </div>
-    </footer>
-  </div>
-</div>
 </template>
 
 <script>
@@ -102,12 +79,10 @@ export default {
       },
       externalsStatus: {
         'mongodb': false,
-        'management': false,
-        'health': false,
-        'enrollment': false,
-        'auth': false,
-        'analytics': false,
-        'telematics': false
+        'redis': false,
+        'sqlserver': false,
+        'zookeeper': false,
+        'kafka': false
       }
     }
   },
@@ -159,4 +134,34 @@ export default {
 
 <style>
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro");
+.fcs-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fcs-column, .reading, .column, .description { 
+  cursor: pointer;
+}
+.fcs-column .app-container {
+  color: #000;
+  border: none;
+  border-radius: 45px;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease 0s;
+  outline: none;
+  padding: 15px;
+}
+
+.fcs-column .app-container:hover {
+  background-color: #c2c9e4;
+  box-shadow: 0px 15px 20px rgba(194,201,228, 0.4);
+  color: #fff;
+  transform: translateY(-7px);
+}
+.btn.btn-default a{
+    color: black;
+    text-decoration: none;
+}
+
 </style>

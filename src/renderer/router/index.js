@@ -13,22 +13,39 @@ export default new Router({
     {
       path: '/fc',
       name: 'fc',
-      component: require('@/components/toolbar-apps/FCSCommands').default
+      component: require('@/components/toolbar-apps/FCSCommands').default,
+      props: {
+        showHeaderAndFooter: false
+      }
     },
     {
       path: '/wl',
       name: 'wl',
-      component: require('@/components/toolbar-apps/WeightedList/WeightedList').default
+      component: require('@/components/toolbar-apps/WeightedList/Home').default,
+      props: {
+        showHeaderAndFooter: false
+      }
     },
     {
       path: '/tl',
       name: 'tl',
-      component: require('@/components/toolbar-apps/TrafficLight').default
+      component: require('@/components/toolbar-apps/TrafficLight').default,
+      props: {
+        showHeaderAndFooter: false
+      }
     },
     {
       path: '/ul',
       name: 'ul',
-      component: require('@/components/toolbar-apps/FCSLinks').default
+      component: require('@/components/toolbar-apps/FCSLinks').default,
+      props: {
+        showHeaderAndFooter: false
+      }
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: require('@/components/Settings').default
     },
     {
       path: '*',

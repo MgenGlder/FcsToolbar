@@ -1,8 +1,9 @@
 'use strict'
 
-import { app, BrowserWindow, Tray, ipcMain, Notification } from 'electron'
+import { app, BrowserWindow, Tray, ipcMain, Notification, dialog } from 'electron'
 import path from 'path'
 import ps from 'portscanner'
+import fs from 'fs'
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -132,6 +133,44 @@ ipcMain.on('serviceStatusChange', (event, service, status) => {
   }
 })
 
+ipcMain.on('allFolderConfigurations', (event) => {
+  let userConfiguration = readConfigurationFile()
+  event.sender.send('allFolderConfigurationsz', userConfiguration)
+})
+
+ipcMain.on('updateFolderConfigurations', (event, userConfiguration) => {
+  createUpdateConfigurationFile(userConfiguration)
+})
+
+ipcMain.on('openDirectory', (event) => {
+  // if (false) {
+  //   dialog.showOpenDialog(mainWindow, {
+
+  //     properties: ['openDirectory']
+
+  //   })
+  // }
+
+})
+
+ipcMain.on('selectFcsDirectory', (event) => {
+  event.sender.send('fcsDirectory', dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory']
+  }))
+})
+
+ipcMain.on('selectFcsWebDirectory', (event) => {
+  event.sender.send('fcsWebDirectory', dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory']
+  }))
+})
+
+ipcMain.on('selectFcsUiDirectory', (event) => {
+  event.sender.send('fcsUiDirectory', dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory']
+  }))
+})
+
 setInterval(() => {
   // console.log('Interval has been passed!!')
   let portsForServices = [
@@ -157,6 +196,57 @@ setInterval(() => {
   checkIfPortsOpenAndEmit(portsForServices, servicesEvent)
   checkIfPortsOpenAndEmit(portsForExternals, externalsEvent)
 }, 300)
+
+// function parseDataFile (filePath, defaults) {
+//   try {
+//     return JSON.parse(fs.readFileSync(filepPath))
+//   } catch (error) {
+//     return {
+//       default: true
+//     }
+//   }
+// }
+
+function readConfigurationFile () {
+  let pathToFile = app.getPath('appData') + '/FCSToolbar/configuration.json'
+  try {
+    let userConfiguration = fs.readFileSync(pathToFile)
+    return JSON.parse(userConfiguration)
+  } catch (err) {
+    createUpdateConfigurationFile()
+    let userConfiguration = fs.readFileSync(pathToFile)
+    return JSON.parse(userConfiguration)
+  }
+}
+
+function createUpdateConfigurationFile (userConfiguration = {name: '', fcsLocation: '', fcsWebLocation: '', fcsUiLocation: ''}) {
+  let pathToStorage = app.getPath('appData') + '/FCSToolbar'
+  let pathToFile = pathToStorage + '/configuration.json'
+  console.log(app.getAppPath())
+  console.log(app.getPath('appData'))
+
+  if (!fs.existsSync(pathToStorage)) {
+    fs.mkdirSync(pathToStorage)
+  }
+
+  // if (!fs.existsSync(pathToFile)) {
+  //   fs.writeFile(pathToFile, 'utf8', function (err) {
+  //     if (err) throw err
+  //   })
+  // }
+
+  let configuration = { name: '', fcsLocation: '', fcsWebLocation: '', fcsUiLocation: '' }
+  configuration.fcsLocation = userConfiguration.fcsLocation
+  configuration.fcsWebLocation = userConfiguration.fcsWebLocation
+  configuration.fcsUiLocation = userConfiguration.fcsUiLocation
+
+  let configurationString = JSON.stringify(configuration)
+  try {
+    fs.writeFileSync(pathToFile, configurationString, 'utf8')
+  } catch (err) {
+    throw err
+  }
+}
 
 function checkIfPortsOpenAndEmit (portsArray, servicesEvent) {
   let activePortMapping = {}
