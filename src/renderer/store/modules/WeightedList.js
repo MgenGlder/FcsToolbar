@@ -34,7 +34,6 @@ const state = {
         {text: 'A lot', weight: 19},
         {text: 'Cats are superior', weight: -9000}
       ]
-
     }
   ]
 }
@@ -73,6 +72,7 @@ const actions = {
     commit('RESET')
   },
   answer ({commit}, payload) {
+    console.log('committing mutation to answer', payload)
     commit('ANSWER', payload)
   }
 }

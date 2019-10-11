@@ -4,6 +4,7 @@ import { app, BrowserWindow, Tray, ipcMain, Notification, dialog } from 'electro
 import path from 'path'
 import ps from 'portscanner'
 import fs from 'fs'
+import '../renderer/store'
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -22,7 +23,7 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
-function createTray () {
+function createTray() {
   tray = new Tray(path.join(assetsDirectory, 'cloudTemplate.png'))
   tray.setToolTip('FCS Toolbox')
   tray.setHighlightMode('selection')
@@ -32,7 +33,7 @@ function createTray () {
     toggleWindow()
     // Show devtools when command clicked
     if (mainWindow.isVisible() && process.defaultApp && event.metaKey) {
-      window.openDevTools({mode: 'detach'})
+      window.openDevTools({ mode: 'detach' })
     }
   })
 }
@@ -46,7 +47,7 @@ const getWindowPosition = () => {
   // Position window 4 pixels vertically below the tray icon
   const y = Math.round(trayBounds.y + trayBounds.height + 4)
 
-  return {x: x, y: y}
+  return { x: x, y: y }
 }
 
 const showWindow = () => {
@@ -54,10 +55,10 @@ const showWindow = () => {
   mainWindow.setPosition(position.x, position.y, false)
   mainWindow.show()
   mainWindow.focus()
-  mainWindow.openDevTools({mode: 'detach'})
+  mainWindow.openDevTools({ mode: 'detach' })
 }
 
-function toggleWindow () {
+function toggleWindow() {
   if (mainWindow.isVisible()) {
     mainWindow.hide()
   } else {
@@ -65,7 +66,7 @@ function toggleWindow () {
   }
 }
 
-function createWindow () {
+function createWindow() {
   createTray()
   /**
    * Initial window options
@@ -81,7 +82,7 @@ function createWindow () {
   })
 
   mainWindow.loadURL(winURL)
-  mainWindow.openDevTools({mode: 'detach'})
+  mainWindow.openDevTools({ mode: 'detach' })
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -135,7 +136,7 @@ ipcMain.on('serviceStatusChange', (event, service, status) => {
 
 ipcMain.on('allFolderConfigurations', (event) => {
   let userConfiguration = readConfigurationFile()
-  event.sender.send('allFolderConfigurationsz', userConfiguration)
+  event.sender.send('allFolderConfigurations', userConfiguration)
 })
 
 ipcMain.on('updateFolderConfigurations', (event, userConfiguration) => {
@@ -207,7 +208,7 @@ setInterval(() => {
 //   }
 // }
 
-function readConfigurationFile () {
+function readConfigurationFile() {
   let pathToFile = app.getPath('appData') + '/FCSToolbar/configuration.json'
   try {
     let userConfiguration = fs.readFileSync(pathToFile)
@@ -219,7 +220,7 @@ function readConfigurationFile () {
   }
 }
 
-function createUpdateConfigurationFile (userConfiguration = {name: '', fcsLocation: '', fcsWebLocation: '', fcsUiLocation: ''}) {
+function createUpdateConfigurationFile(userConfiguration = { name: '', folderLocations: { fcs: '', fcsWeb: '', fcsUi: '' } }) {
   let pathToStorage = app.getPath('appData') + '/FCSToolbar'
   let pathToFile = pathToStorage + '/configuration.json'
   console.log(app.getAppPath())
@@ -234,13 +235,8 @@ function createUpdateConfigurationFile (userConfiguration = {name: '', fcsLocati
   //     if (err) throw err
   //   })
   // }
-
-  let configuration = { name: '', fcsLocation: '', fcsWebLocation: '', fcsUiLocation: '' }
-  configuration.fcsLocation = userConfiguration.fcsLocation
-  configuration.fcsWebLocation = userConfiguration.fcsWebLocation
-  configuration.fcsUiLocation = userConfiguration.fcsUiLocation
-
-  let configurationString = JSON.stringify(configuration)
+  console.log('saving...', userConfiguration)
+  let configurationString = JSON.stringify(userConfiguration)
   try {
     fs.writeFileSync(pathToFile, configurationString, 'utf8')
   } catch (err) {
@@ -248,7 +244,7 @@ function createUpdateConfigurationFile (userConfiguration = {name: '', fcsLocati
   }
 }
 
-function checkIfPortsOpenAndEmit (portsArray, servicesEvent) {
+function checkIfPortsOpenAndEmit(portsArray, servicesEvent) {
   let activePortMapping = {}
   let promiseArray = []
   portsArray.forEach((port) => {

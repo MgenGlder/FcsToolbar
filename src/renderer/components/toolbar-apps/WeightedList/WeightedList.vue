@@ -11,35 +11,35 @@
 </template>
 
 <script>
-import Question from './Question'
+import Question from "./Question";
 
 export default {
-    name: 'WeightedList',
+    name: "WeightedList",
     components: {
         Question
     },
     data() {
         return {
             selected: 0
-        }
+        };
     },
     computed: {
         questions() {
-            return this.$store.state.WeightedList.questions
+            return this.$store.state.WeightedList.questions;
         },
         score() {
-            return this.$store.getters['WeightedList/sevScore']
+            return this.$store.getters["WeightedList/sevScore"];
         }
     },
     methods: {
         uuid(key) {
-            return 'question-' + key
+            return "question-" + key;
         },
         reset() {
-            this.$store.dispatch('WeightedList/reset')
+            this.$store.dispatch("WeightedList/reset");
         }
     }
-}
+};
 </script>
 
 <style lang="scss">

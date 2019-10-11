@@ -1,7 +1,6 @@
 <template>
   <label :for="uuid">
     {{question.label}}
-    <radiogroup>
       <Answer 
         v-for="(answer, key) in question.answers" 
         :answer="answer"
@@ -9,7 +8,6 @@
         :value="key"
         :question-index="index"
       ></Answer>
-    </radiogroup>
   </label>
 </template>
 
@@ -37,6 +35,7 @@ export default {
   },
   watch: {
     selectedAnswerIndex (newVal, oldVal) {
+      console.log('selecting answer')
       this.$store.dispatch('WeightedList/setWeight', {
         questionId: this.index,
         answerId: newVal

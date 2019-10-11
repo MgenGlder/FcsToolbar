@@ -28,6 +28,7 @@
           return this.$store.state.WeightedList.questions[this.questionIndex].selectedAnswerIndex
         },
         set (value) {
+          console.log('setting the value of answer in the vuex store')
           this.$store.dispatch('WeightedList/answer', {
             questionId: this.questionIndex,
             answerId: value
