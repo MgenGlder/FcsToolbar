@@ -10,6 +10,10 @@
                     <br/> FCS: <input :value="folderLocations.fcs" disabled="disabled" />
                     <br/> FCS Web: <input :value="folderLocations.fcsWeb" disabled="disabled" />
                     <br/> FCS UI: <input :value="folderLocations.fcsUi" disabled="disabled" />
+                    <b-button v-b-popover.hover.top="'I am popover directive content!'" title="Popover Title">
+                        Hover Me
+                    </b-button>
+    
                     <br/>
                 </div>
             </div>
@@ -87,21 +91,18 @@ export default {
 .settings-header {
     text-align: center;
 }
+
 .settings-container {
     background-color: white;
     margin: 20px;
     border-radius: 20px;
 }
+
 .settings-section {
     margin-left: 15px;
 }
+
 .pane {
-    background: repeating-linear-gradient(
-  45deg,
-  rgba(0, 0, 0, 0.2),
-  rgba(0, 0, 0, 0.2) 10px,
-  rgba(0, 0, 0, 0.3) 10px,
-  rgba(0, 0, 0, 0.3) 20px
-)
+    background: repeating-linear-gradient( 45deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) 10px, rgba(0, 0, 0, 0.3) 10px, rgba(0, 0, 0, 0.3) 20px)
 }
 </style>
