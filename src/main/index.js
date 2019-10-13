@@ -9,6 +9,7 @@ import '../renderer/store'
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
+
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
@@ -23,7 +24,7 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
-function createTray() {
+function createTray () {
   tray = new Tray(path.join(assetsDirectory, 'cloudTemplate.png'))
   tray.setToolTip('FCS Toolbox')
   tray.setHighlightMode('selection')
@@ -58,7 +59,7 @@ const showWindow = () => {
   mainWindow.openDevTools({ mode: 'detach' })
 }
 
-function toggleWindow() {
+function toggleWindow () {
   if (mainWindow.isVisible()) {
     mainWindow.hide()
   } else {
@@ -66,7 +67,7 @@ function toggleWindow() {
   }
 }
 
-function createWindow() {
+function createWindow () {
   createTray()
   /**
    * Initial window options
@@ -104,7 +105,6 @@ app.on('activate', () => {
 })
 
 ipcMain.on('openApp', (event, appName) => {
-  console.log(appName)
   let newWindow = new BrowserWindow({
     height: 800,
     width: 800,
@@ -117,7 +117,6 @@ ipcMain.on('openApp', (event, appName) => {
 })
 
 ipcMain.on('ping', (event, arg) => {
-  console.log(arg)
   event.sender.send('pingBack', 'I got your ping')
 })
 
@@ -128,10 +127,6 @@ ipcMain.on('serviceStatusChange', (event, service, status) => {
   })
 
   myNotification.show()
-
-  myNotification.onclick = () => {
-    console.log('Notification clicked')
-  }
 })
 
 ipcMain.on('allFolderConfigurations', (event) => {
@@ -141,17 +136,6 @@ ipcMain.on('allFolderConfigurations', (event) => {
 
 ipcMain.on('updateFolderConfigurations', (event, userConfiguration) => {
   createUpdateConfigurationFile(userConfiguration)
-})
-
-ipcMain.on('openDirectory', (event) => {
-  // if (false) {
-  //   dialog.showOpenDialog(mainWindow, {
-
-  //     properties: ['openDirectory']
-
-  //   })
-  // }
-
 })
 
 ipcMain.on('selectFcsDirectory', (event) => {
@@ -173,7 +157,6 @@ ipcMain.on('selectFcsUiDirectory', (event) => {
 })
 
 setInterval(() => {
-  // console.log('Interval has been passed!!')
   let portsForServices = [
     '8080',
     '8081',
@@ -208,7 +191,7 @@ setInterval(() => {
 //   }
 // }
 
-function readConfigurationFile() {
+function readConfigurationFile () {
   let pathToFile = app.getPath('appData') + '/FCSToolbar/configuration.json'
   try {
     let userConfiguration = fs.readFileSync(pathToFile)
@@ -220,22 +203,14 @@ function readConfigurationFile() {
   }
 }
 
-function createUpdateConfigurationFile(userConfiguration = { name: '', folderLocations: { fcs: '', fcsWeb: '', fcsUi: '' } }) {
+function createUpdateConfigurationFile (userConfiguration = { name: '', folderLocations: { fcs: '', fcsWeb: '', fcsUi: '' } }) {
   let pathToStorage = app.getPath('appData') + '/FCSToolbar'
   let pathToFile = pathToStorage + '/configuration.json'
-  console.log(app.getAppPath())
-  console.log(app.getPath('appData'))
 
   if (!fs.existsSync(pathToStorage)) {
     fs.mkdirSync(pathToStorage)
   }
 
-  // if (!fs.existsSync(pathToFile)) {
-  //   fs.writeFile(pathToFile, 'utf8', function (err) {
-  //     if (err) throw err
-  //   })
-  // }
-  console.log('saving...', userConfiguration)
   let configurationString = JSON.stringify(userConfiguration)
   try {
     fs.writeFileSync(pathToFile, configurationString, 'utf8')
@@ -244,7 +219,7 @@ function createUpdateConfigurationFile(userConfiguration = { name: '', folderLoc
   }
 }
 
-function checkIfPortsOpenAndEmit(portsArray, servicesEvent) {
+function checkIfPortsOpenAndEmit (portsArray, servicesEvent) {
   let activePortMapping = {}
   let promiseArray = []
   portsArray.forEach((port) => {

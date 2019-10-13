@@ -4,9 +4,9 @@
             <div class="settings-container">
                 <h2 class="settings-header">Service Locations</h2>
                 <div class="settings-section">
-                    <button @click="getFcsLocation">FCS</button>
-                    <button @click="getFcsWebLocation">FCS Web</button>
-                    <button @click="getFcsUiLocation">FCS UI</button>
+                    <button @click="getLocation('Fcs')">FCS</button>
+                    <button @click="getLocation('FcsWeb')">FCS Web</button>
+                    <button @click="getLocation('FcsUi')">FCS UI</button>
                     <br/> FCS: <input :value="folderLocations.fcs" disabled="disabled" />
                     <br/> FCS Web: <input :value="folderLocations.fcsWeb" disabled="disabled" />
                     <br/> FCS UI: <input :value="folderLocations.fcsUi" disabled="disabled" />
@@ -28,9 +28,9 @@ export default {
     mounted() {
         this.$electron.ipcRenderer.send('allFolderConfigurations')
         this.$electron.ipcRenderer.on('allFolderConfigurations', this.onConfigurationReceived)
-        this.$electron.ipcRenderer.on('fcsDirectory', this.onFcsLocationReceived)
-        this.$electron.ipcRenderer.on('fcsWebDirectory', this.onFcsWebLocationReceived)
-        this.$electron.ipcRenderer.on('fcsUiDirectory', this.onFcsUiLocationReceived)
+        this.$electron.ipcRenderer.on('fcsDirectory', this.onLocationReceived('fcs'))
+        this.$electron.ipcRenderer.on('fcsWebDirectory', this.onLocationReceived('fcsWeb'))
+        this.$electron.ipcRenderer.on('fcsUiDirectory', this.onLocationReceived('fcsUi'))
         console.log(this.$store)
     },
     beforeDestroy() {
@@ -50,33 +50,14 @@ export default {
         }
     },
     methods: {
-        saveAllConfigurations() {
-            this.$electron.ipcRenderer.send('updateFolderConfigurations', { folderLocations: this.folderLocations });
-        },
-        onFcsLocationReceived(event, message) {
-            this.folderLocations = this.cloneAndReplaceField(this.folderLocations, 'fcs', message[0]);
-        },
-        onFcsWebLocationReceived(event, message) {
-
-            this.folderLocations = this.cloneAndReplaceField(this.folderLocations, 'fcsWeb', message[0]);
-        },
-        onFcsUiLocationReceived(event, message) {
-            this.folderLocations = this.cloneAndReplaceField(this.folderLocations, 'fcsUi', message[0]);
-        },
-        mainOpenDirectory() {
-            this.$electron.ipcRenderer.send('openDirectory')
+        onLocationReceived(service) {
+            return (event, message) => this.folderLocations = this.cloneAndReplaceField(this.folderLocations, service, message[0]);
         },
         onConfigurationReceived(event, message) {
             this.folderLocations = message.folderLocations
         },
-        getFcsLocation() {
-            this.$electron.ipcRenderer.send('selectFcsDirectory')
-        },
-        getFcsWebLocation() {
-            this.$electron.ipcRenderer.send('selectFcsWebDirectory')
-        },
-        getFcsUiLocation() {
-            this.$electron.ipcRenderer.send('selectFcsUiDirectory')
+        getLocation(service) {
+            this.$electron.ipcRenderer.send(`select${service}Directory`)
         },
         cloneAndReplaceField(targetObject, fieldToReplace, valueToReplaceWith) {
             let clonedTarget = cloneDeep(targetObject);
