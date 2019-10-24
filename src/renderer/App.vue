@@ -74,8 +74,7 @@ export default {
         routeToSettings() {
             this.$router.push({ name: "settings" });
         },
-        toggleHeaderAndFooter(booleanValue) {
-            console.log('Changing the headerFooterShow value to...' + booleanValue);
+        toggleHeaderAndFooter() {
             this.showHeaderAndFooter = false;
         }
     }
