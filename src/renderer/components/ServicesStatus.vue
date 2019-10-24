@@ -126,7 +126,6 @@ export default {
     },
     methods: {
         onRestartUatClick (serviceToStart, event, ref) {
-          console.log('clicked restart w/ UAT', serviceToStart, event, ref);
           setTimeout(() => {
             this.$refs[ref].hide(true)
           }, 500);
