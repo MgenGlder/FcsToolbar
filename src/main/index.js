@@ -1,6 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow, Tray, ipcMain, Notification, dialog } from 'electron'
+import shell from 'shelljs'
 import path from 'path'
 import ps from 'portscanner'
 import fs from 'fs'
@@ -127,6 +128,21 @@ ipcMain.on('serviceStatusChange', (event, service, status) => {
   })
 
   myNotification.show()
+})
+
+ipcMain.on('fcsLaunch', (event, service, environment) => {
+  let {fcs} = this.readConfigurationFile()
+  shell.exec(`${fcs}/${service}/launch.sh ${environment}`)
+})
+
+ipcMain.on('fcsWebLaunch', () => {
+  let {fcsWeb} = this.readConfigurationFile()
+  shell.exec(`cd ${fcsWeb}; npm run dev;`)
+})
+
+ipcMain.on('fcsExternalsLaunch', (event, service, environment) => {
+  let {fcs} = this.readConfigurationFile()
+  shell.exec(`${fcs}/local-services/up`)
 })
 
 ipcMain.on('allFolderConfigurations', (event) => {

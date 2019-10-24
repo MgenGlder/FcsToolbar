@@ -70,7 +70,7 @@
                   <span class="icon icon-record" :class="{active: servicesStatus['fcs-web'], inactive: !servicesStatus['fcs-web']}"> FCS Web</span>
               </span>
           </template>
-          <b-dropdown-item @click="onRestartUatClick('fcs-web', $event, 'fcs-web-dropdown')">
+          <b-dropdown-item @click="onRestartWebUatClick('fcs-web', $event, 'fcs-web-dropdown')">
               Restart w/ UAT
           </b-dropdown-item>
           <b-dropdown-item>
@@ -126,9 +126,13 @@ export default {
     },
     methods: {
         onRestartUatClick (serviceToStart, event, ref) {
+          this.$electron.ipcRenderer.send('fcsLaunch', serviceToStart, 'uat')
           setTimeout(() => {
             this.$refs[ref].hide(true)
           }, 500);
+        },
+        onRestartWebUatClick () {
+            this.$electron.ipcRenderer.send('fcsWebLaunch')
         }
     }
 }
