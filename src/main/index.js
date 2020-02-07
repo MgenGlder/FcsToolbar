@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, Tray, ipcMain, Notification, dialog } from 'electron'
+import { app, BrowserWindow, Tray, ipcMain, Notification, dialog, autoUpdater } from 'electron'
 import shell from 'shelljs'
 import path from 'path'
 import ps from 'portscanner'
@@ -20,6 +20,10 @@ app.dock.hide()
 let tray
 let window
 let mainWindow
+const server = 'https://hazel.mgenglder.now.sh'
+const feed = `${server}/update/${process.platform}/${app.getVersion()}`
+console.log('feed url ', feed)
+// autoUpdater.setFeedURL(feed)
 const assetsDirectory = path.join(__dirname, 'assets')
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
@@ -105,6 +109,25 @@ app.on('activate', () => {
   }
 })
 
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['Restart', 'Later'],
+    title: 'Application Update',
+    message: process.platform === 'win32' ? releaseNotes : releaseName,
+    detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+  }
+
+  dialog.showMessageBox(dialogOpts, (response) => {
+    if (response === 0) autoUpdater.quitAndInstall()
+  })
+})
+
+autoUpdater.on('error', message => {
+  console.error('There was a problem updating the application')
+  console.error(message)
+})
+
 ipcMain.on('openApp', (event, appName) => {
   let newWindow = new BrowserWindow({
     height: 800,
@@ -122,27 +145,17 @@ ipcMain.on('ping', (event, arg) => {
 })
 
 ipcMain.on('serviceStatusChange', (event, service, status) => {
+  console.log('services status changed!! ', service, ' ', status)
   let myNotification = new Notification({
     title: service + ' has changed it\'s status',
     body: 'it is now ' + status
   })
-
-  myNotification.show()
-})
-
-ipcMain.on('fcsLaunch', (event, service, environment) => {
-  let {fcs} = this.readConfigurationFile()
-  shell.exec(`${fcs}/${service}/launch.sh ${environment}`)
-})
-
-ipcMain.on('fcsWebLaunch', () => {
-  let {fcsWeb} = this.readConfigurationFile()
-  shell.exec(`cd ${fcsWeb}; npm run dev;`)
-})
-
-ipcMain.on('fcsExternalsLaunch', (event, service, environment) => {
-  let {fcs} = this.readConfigurationFile()
-  shell.exec(`${fcs}/local-services/up`)
+  for (let x = 0; x < 10; x++) {
+    myNotification.close()
+  }
+  for (let x = 0; x < 10; x++) {
+    myNotification.show()
+  }
 })
 
 ipcMain.on('allFolderConfigurations', (event) => {
@@ -170,6 +183,34 @@ ipcMain.on('selectFcsUiDirectory', (event) => {
   event.sender.send('fcsUiDirectory', dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
   }))
+})
+
+ipcMain.on('launchFcs', (event, serviceToStart, environment) => {
+  console.log('launching fcs!' + ' ' + serviceToStart + ' in ' + environment)
+  let { fcs } = readConfigurationFile()
+  shell.exec(`bash ${fcs}/${serviceToStart}/launch.sh ${environment}`, function (code, stdout, stderror) {
+    console.log('output... ' + serviceToStart)
+    console.log('code... ' + code)
+    console.log(stdout)
+  })
+})
+
+ipcMain.on('launchFcsWeb', (event, environment) => {
+  console.log('launching fcs web! in ' + environment)
+  let { fcsWeb } = readConfigurationFile()
+  shell.exec(`cd ${fcsWeb} && npm run local-dev`, function (code, stdout, stderror) {
+    console.log('code... ' + code)
+    console.log(stdout)
+  })
+})
+
+ipcMain.on('launchExternal', (event, externalName) => {
+  console.log('launching ' + externalName)
+  let { fcs } = readConfigurationFile()
+  shell.exec(`bash ${fcs}/local-services/dbUp.sh`, function (code, stdout, stderror) {
+    console.log('code... ' + code)
+    console.log(stdout)
+  })
 })
 
 setInterval(() => {
@@ -235,7 +276,7 @@ function createUpdateConfigurationFile (userConfiguration = { name: '', folderLo
   }
 }
 
-function checkIfPortsOpenAndEmit (portsArray, servicesEvent) {
+function checkIfPortsOpenAndEmitOld (portsArray, servicesEvent) {
   let activePortMapping = {}
   let promiseArray = []
   portsArray.forEach((port) => {
@@ -253,6 +294,44 @@ function checkIfPortsOpenAndEmit (portsArray, servicesEvent) {
     .catch((e) => {
       console.log(e, 'catastrophic failure')
     })
+}
+
+function checkIfPortsOpenAndEmit (portsArray, servicesEvent) {
+  let activePortMapping = {}
+  let promiseArray = []
+  portsArray.forEach((port) => {
+    promiseArray.push(ps.checkPortStatus(port, '127.0.0.1'))
+  })
+
+  Promise.all(promiseArray)
+    .then((values) => {
+      values.map((value, index) => {
+        let currentPortStatus
+        let currentPort = portsArray[index]
+        switch (value) {
+          case 'open':
+            console.log('something was started: ', currentPort)
+            currentPortStatus = 'started'
+            break
+          case 'closed':
+            currentPortStatus = 'stopped'
+            break
+          default:
+            currentPortStatus = 'stopped'
+            break
+        }
+
+        activePortMapping[currentPort] = currentPortStatus
+      })
+      mainWindow.webContents.send(servicesEvent, activePortMapping)
+    })
+    .catch((e) => {
+      console.log(e, 'catastrophic failure')
+    })
+
+  setInterval(() => {
+    autoUpdater.checkForUpdates()
+  }, 600)
 }
 /**
  * Auto Updater
