@@ -146,16 +146,13 @@ ipcMain.on('ping', (event, arg) => {
 
 ipcMain.on('serviceStatusChange', (event, service, status) => {
   console.log('services status changed!! ', service, ' ', status)
-  let myNotification = new Notification({
+  // let myNotification =
+    new Notification({
     title: service + ' has changed it\'s status',
     body: 'it is now ' + status
-  })
-  for (let x = 0; x < 10; x++) {
-    myNotification.close()
-  }
-  for (let x = 0; x < 10; x++) {
-    myNotification.show()
-  }
+  }).show()
+    // myNotification.close()
+    // myNotification.show()
 })
 
 ipcMain.on('allFolderConfigurations', (event) => {
@@ -187,11 +184,14 @@ ipcMain.on('selectFcsUiDirectory', (event) => {
 
 ipcMain.on('launchFcs', (event, serviceToStart, environment) => {
   console.log('launching fcs!' + ' ' + serviceToStart + ' in ' + environment)
+  if (serviceToStart === 'enrollment') serviceToStart = 'vehicle-enrollment';
   let { fcs } = readConfigurationFile()
-  shell.exec(`bash ${fcs}/${serviceToStart}/launch.sh ${environment}`, function (code, stdout, stderror) {
+  // deleteFile(bufferPath + serviceToStart + ".txt")
+  shell.exec(`bash ${fcs}/${serviceToStart}/launch.sh -p ${environment} restart`, function (code, stdout, stderror) {
     console.log('output... ' + serviceToStart)
     console.log('code... ' + code)
     console.log(stdout)
+    // appendToFile(bufferPath + serviceToStart + ".txt", "\n" + stdout);
   })
 })
 
@@ -199,6 +199,25 @@ ipcMain.on('launchFcsWeb', (event, environment) => {
   console.log('launching fcs web! in ' + environment)
   let { fcsWeb } = readConfigurationFile()
   shell.exec(`cd ${fcsWeb} && npm run local-dev`, function (code, stdout, stderror) {
+    console.log('code... ' + code)
+    console.log(stdout)
+  })
+})
+
+ipcMain.on('stopFcsWeb', (event) => {
+  console.log('stoppihng fcs web!')
+  let { fcsWeb } = readConfigurationFile()
+  shell.exec(`kill -9 $(lsof -i :8080 | sed -n -e '/^node/p' | sed -n 1p | sed -e 's/node//' | sed -e 's/^[ \\t]*//' | cut -d' ' -f1)`, function (code, stdout, stderror) {
+    console.log('code... ' + code)
+    console.log(stdout)
+  })
+})
+
+ipcMain.on('stopFcs', (event, serviceToStop) => {
+  console.log('stoppihng fcs web!')
+  if (serviceToStop === 'enrollment') serviceToStop = 'vehicle-enrollment';
+  let { fcs } = readConfigurationFile()
+  shell.exec(`bash ${fcs}/${serviceToStop}/launch.sh stop`, function (code, stdout) {
     console.log('code... ' + code)
     console.log(stdout)
   })
@@ -216,13 +235,15 @@ ipcMain.on('launchExternal', (event, externalName) => {
 setInterval(() => {
   let portsForServices = [
     '8080',
-    '8081',
-    '8082',
-    '8083',
-    '8084',
-    '8085',
-    '8086',
-    '8087'
+    '8881',
+    '8882',
+    '8883',
+    '8884',
+    '8885',
+    '8886',
+    '8887',
+    '8888',
+    '8889'
   ]
   let servicesEvent = 'allRunningServicesResponse'
 
@@ -236,7 +257,7 @@ setInterval(() => {
   let externalsEvent = 'allRunningExternalsResponse'
   checkIfPortsOpenAndEmit(portsForServices, servicesEvent)
   checkIfPortsOpenAndEmit(portsForExternals, externalsEvent)
-}, 300)
+}, 600)
 
 // function parseDataFile (filePath, defaults) {
 //   try {
@@ -310,7 +331,6 @@ function checkIfPortsOpenAndEmit (portsArray, servicesEvent) {
         let currentPort = portsArray[index]
         switch (value) {
           case 'open':
-            console.log('something was started: ', currentPort)
             currentPortStatus = 'started'
             break
           case 'closed':

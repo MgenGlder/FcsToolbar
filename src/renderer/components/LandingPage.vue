@@ -53,12 +53,12 @@ export default {
     return {
       portMapping: {
         "8080": "fcs-web",
-        "8081": "management",
-        "8082": "health",
-        "8083": "enrollment",
-        "8084": "auth",
-        "8085": "analytics",
-        "8086": "telematics"
+        "8881": "telematics",
+        "8882": "enrollment",
+        "8883": "analytics",
+        "8885": "management",
+        "8886": "health",
+        "8889": "auth",
       },
       externalsPortMapping: {
         "8088": "mongodb",
