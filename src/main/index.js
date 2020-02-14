@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, Tray, ipcMain, Notification, dialog, autoUpdater } from 'electron'
+import { app, BrowserWindow, Tray, ipcMain, Notification, dialog, autoUpdater, nativeImage } from 'electron'
 import shell from 'shelljs'
 import path from 'path'
 import ps from 'portscanner'
@@ -24,13 +24,18 @@ const server = 'https://hazel.mgenglder.now.sh'
 const feed = `${server}/update/${process.platform}/${app.getVersion()}`
 console.log('feed url ', feed)
 // autoUpdater.setFeedURL(feed)
-const assetsDirectory = path.join(__dirname, 'assets')
+const assetsDirectory = path.resolve(__dirname, 'assets')
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
 function createTray () {
-  tray = new Tray(path.join(assetsDirectory, 'cloudTemplate.png'))
+  let imageUrl = path.join(assetsDirectory, 'cloudTemplate.png')
+  console.log(imageUrl)
+  let nativeImageUrl = nativeImage.createFromPath(imageUrl);
+  console.log(nativeImageUrl)
+  // let nativeImage = nativeImage.createFromPath(imageUrl);
+  tray = new Tray(nativeImageUrl)
   tray.setToolTip('FCS Toolbox')
   tray.setHighlightMode('selection')
   tray.on('right-click', toggleWindow)
