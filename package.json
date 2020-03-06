@@ -1,6 +1,6 @@
 {
   "name": "test",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "author": "Kunle Oshiyoye <mgen.glder@gmail.com>",
   "description": "An electron-vue project",
   "license": null,
@@ -27,7 +27,7 @@
     "appId": "fcs-toolbar",
     "directories": {
       "output": "build",
-      "buildResources": "src/main/assets"
+      "buildResources": "src/main/assets/*"
     },
     "files": [
       "dist/electron/**/*",
@@ -49,7 +49,8 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "target": "pkg"
     },
     "win": {
       "icon": "build/icons/icon.ico"

@@ -1,8 +1,9 @@
 <template>
   <div class="window-content">
     <div class="pane">
+      lemonade 0.0.5
       <services-status :servicesStatus="servicesStatus" />
-
+      lemonade
       <div class="striped-bar"></div>
 
       <externals-status :externalsStatus="externalsStatus" />

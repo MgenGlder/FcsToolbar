@@ -36,6 +36,7 @@ function createTray () {
   console.log(nativeImageUrl)
   // let nativeImage = nativeImage.createFromPath(imageUrl);
   tray = new Tray(nativeImageUrl)
+
   tray.setToolTip('FCS Toolbox')
   tray.setHighlightMode('selection')
   tray.on('right-click', toggleWindow)
