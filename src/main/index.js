@@ -22,19 +22,15 @@ let window
 let mainWindow
 const server = 'https://hazel.mgenglder.now.sh'
 const feed = `${server}/update/${process.platform}/${app.getVersion()}`
+const imgPath = app.isPackaged ? path.join(process.resourcesPath, 'cloudTemplate.png') : path.join(path.resolve(__dirname, 'assets'), 'cloudTemplate.png')
 console.log('feed url ', feed)
 // autoUpdater.setFeedURL(feed)
-const assetsDirectory = path.resolve(__dirname, 'assets')
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
 function createTray () {
-  let imageUrl = path.join(assetsDirectory, 'cloudTemplate.png')
-  console.log(imageUrl)
-  let nativeImageUrl = nativeImage.createFromPath(imageUrl);
-  console.log(nativeImageUrl)
-  // let nativeImage = nativeImage.createFromPath(imageUrl);
+  let nativeImageUrl = nativeImage.createFromPath(imgPath);
   tray = new Tray(nativeImageUrl)
   tray.setToolTip('FCS Toolbox')
   tray.setHighlightMode('selection')
