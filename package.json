@@ -76,7 +76,7 @@
     "popper.js": "^1.16.1",
     "vue": "^2.6.10",
     "vue-electron": "^1.0.6",
-    "vue-router": "^3.0.1",
+    "vue-router": "^3.1.5",
     "vuex": "^3.0.1",
     "vuex-electron": "^1.0.0"
   },
